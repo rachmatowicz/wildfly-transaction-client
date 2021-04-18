@@ -44,6 +44,7 @@ final class XAOutflowedResources {
     }
 
     SubordinateXAResource getOrEnlist(final URI location, final String parentName) throws SystemException, RollbackException {
+        System.out.printf("XAOutflowedResources: calling getOrEnlist(%s,%s)\n", location.toString(), parentName);
         final Key key = new Key(location, parentName);
         SubordinateXAResource xaResource = enlistments.get(key);
         if (xaResource != null) {

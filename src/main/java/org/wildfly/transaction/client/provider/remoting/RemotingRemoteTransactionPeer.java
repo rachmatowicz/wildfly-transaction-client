@@ -86,6 +86,12 @@ class RemotingRemoteTransactionPeer implements RemoteTransactionPeer {
         } else {
             finalAuthenticationConfiguration = authenticationConfiguration;
         }
+        String node = System.getProperty("jboss.node.name", "unknown");
+        System.out.printf("*** RemotingRemoteTransactionPeer[%s]: Calling getPeerIdentity for location %s\n", node, location.toString()) ;
+        System.out.printf("*** RemotingRemoteTransactionPeer[%s]: AuthenticationConfiguration = %s\n", node, finalAuthenticationConfiguration.toString());
+        System.out.printf("*** RemotingRemoteTransactionPeer[%s]: SSLContext protocol = %s\n", node, finalSslContext.getProtocol());
+        System.out.flush();
+
         return endpoint.getConnectedIdentity(location, finalSslContext, finalAuthenticationConfiguration).get();
     }
 

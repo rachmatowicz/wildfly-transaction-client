@@ -212,6 +212,7 @@ public final class RemoteTransactionContext implements Contextual<RemoteTransact
      * @throws UnsupportedOperationException if the provider for the location does not support outflow
      */
     public XAOutflowHandle outflowTransaction(final URI location, final LocalTransaction transaction) throws SystemException, IllegalStateException, UnsupportedOperationException, RollbackException {
+        System.out.printf("RemoteTransactionContext: calling outFlowTransaction(%s, %s)\n", location.toString(), transaction.getClass().getName());
         Assert.checkNotNullParam("location", location);
         Assert.checkNotNullParam("transaction", transaction);
 

@@ -64,12 +64,14 @@ final class SubordinateXAResource implements XAResource, XARecoverable, Serializ
         this.parentName = parentName;
         this.resourceRegistry = recoveryRegistry;
         this.authenticationContext = AuthenticationContext.captureCurrent();
+        System.out.printf("SubordinateXAResource: calling <init1>(%s, %s)\n", location.toString(), parentName);
     }
 
     SubordinateXAResource(final URI location, final String parentName, Xid xid, final int flags, XAResourceRegistry recoveryRegistry) {
         this(location, parentName, recoveryRegistry);
         this.xid = xid;
         stateRef.set(flags);
+        System.out.printf("SubordinateXAResource: calling <init2>(%s, %s)\n", location.toString(), parentName);
     }
 
     SubordinateXAResource(final URI location, final int flags, final String parentName) {
@@ -78,6 +80,7 @@ final class SubordinateXAResource implements XAResource, XARecoverable, Serializ
         stateRef.set(flags);
         this.resourceRegistry = null;
         this.authenticationContext = AuthenticationContext.captureCurrent();
+        System.out.printf("SubordinateXAResource: calling <init3>(%s, %s)\n", location.toString(), parentName);
     }
 
     Xid getXid() {
@@ -130,6 +133,7 @@ final class SubordinateXAResource implements XAResource, XARecoverable, Serializ
     }
 
     public void start(final Xid xid, final int flags) throws XAException {
+        System.out.printf("SubordinateXAResource[%s, %s] calling start() with Xid\n", location.toString(), parentName);
         if (flags == TMJOIN) {
             // should be impossible
             throw Assert.unreachableCode();
@@ -152,16 +156,19 @@ final class SubordinateXAResource implements XAResource, XARecoverable, Serializ
     }
 
     public void end(final Xid xid, final int flags) throws XAException {
+        System.out.printf("SubordinateXAResource[%s, %s] calling end() with Xid\n", location.toString(), parentName);
         if (flags == TMSUCCESS || flags == TMFAIL) {
             lookup(xid).end(flags);
         }
     }
 
     public void beforeCompletion(final Xid xid) throws XAException {
+        System.out.printf("SubordinateXAResource[%s, %s] calling beforeCompletion() with Xid\n", location.toString(), parentName);
         if (commitToEnlistment()) lookup(xid).beforeCompletion();
     }
 
     public int prepare(final Xid xid) throws XAException {
+        System.out.printf("SubordinateXAResource[%s, %s] calling prepare() with Xid\n", location.toString(), parentName);
         final int result;
         try {
             result = commitToEnlistment() ? lookup(xid).prepare() : XA_RDONLY;
@@ -177,6 +184,7 @@ final class SubordinateXAResource implements XAResource, XARecoverable, Serializ
     }
 
     public void commit(final Xid xid, final boolean onePhase) throws XAException {
+        System.out.printf("SubordinateXAResource[%s, %s] calling commit() with Xid\n", location.toString(), parentName);
         try {
             if (commitToEnlistment()) lookup(xid).commit(onePhase);
         } catch (XAException | RuntimeException exception) {
@@ -202,6 +210,7 @@ final class SubordinateXAResource implements XAResource, XARecoverable, Serializ
     }
 
     public void rollback(final Xid xid) throws XAException {
+        System.out.printf("SubordinateXAResource[%s, %s] calling rollback() with Xid\n", location.toString(), parentName);
         try {
             if (commitToEnlistment()) lookup(xid).rollback();
         } catch (XAException | RuntimeException e) {
@@ -214,6 +223,7 @@ final class SubordinateXAResource implements XAResource, XARecoverable, Serializ
     }
 
     public void forget(final Xid xid) throws XAException {
+        System.out.printf("SubordinateXAResource[%s, %s] calling forget() with Xid\n", location.toString(), parentName);
         if (commitToEnlistment()) lookup(xid).forget();
     }
 
@@ -226,6 +236,7 @@ final class SubordinateXAResource implements XAResource, XARecoverable, Serializ
         if (provider == null) {
             throw Log.log.noProviderForUri(location);
         }
+        System.out.printf("SubordinateXAResource: calling getProvider(%s) with Provider %s\n", location.toString(), provider.getClass().getName());
         return provider;
     }
 
@@ -241,6 +252,7 @@ final class SubordinateXAResource implements XAResource, XARecoverable, Serializ
     }
 
     private RemoteTransactionPeer getRemoteTransactionPeer() throws XAException {
+        System.out.println("SubordinateXAResource: calling getRemoteTransactionPeer()");
         try {
             return authenticationContext.run((PrivilegedExceptionAction<RemoteTransactionPeer>) () -> getProvider().getPeerHandleForXa(location, null, null));
         } catch (PrivilegedActionException e) {
